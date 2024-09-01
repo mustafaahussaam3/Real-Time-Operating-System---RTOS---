@@ -1,4 +1,5 @@
 # Real Time Operating System ( RTOS ) 
+<<<<<<< HEAD
  Third part of Eng Mohamed Tarek Advanced Embedded Course that work with RTOS.
 
 - In this part we will study all the features of the real time operating system include: 
@@ -81,3 +82,7 @@ BaseType_t xTaskCreate(
 ### ![Lab1: Multitasking with FreeRTOS (Serial)](<>)
 
 This introductory lab demonstrates the idea of multitasking with FreeRTOS, The setup involves two tasks, vPeriodicTask1 and vPeriodicTask2, both having equal priority. FreeRTOS smoothly switches between these tasks, enabling each to print its message "Task x is running\r\n" through UART in a loop every 1 second.
+=======
+ Third part of Eng Mohamed Tarek Advanced Embedded Course that work with RTOS. 
+ 
+>>>>>>> 13c57075fe51ecf6613ac91ab377b27942c1d6e5
