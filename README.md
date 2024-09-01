@@ -1,6 +1,6 @@
 # Real Time Operating System ( RTOS ) 
- Third part of Eng Mohamed Tarek Advanced Embedded Course that work with RTOS.
 
+ Third part of Eng Mohamed Tarek Advanced Embedded Course that work with RTOS.
 
 - Unlike background/foreground systems that is less complex, freeRTOS is task based system which controlling complex systems using several task. 
 - Each task think that it own's the processor, but actually they all own the processor but in multitasking procedure buy controlling this through our tick. 
@@ -174,4 +174,5 @@ void vPeriodicTask(void *pvParameters)
 
 ### Lab5: Passing multiple parameters to task (LEDs with serial)
 In the lab, it is required to advance the concept of task parameterization by sending multiple task information containing both the string to be printed and the LED to be toggled. Tasks "Task 1" and "Task 2" share the same task body but now receive 2 pieces of data, allowing differentiation in both messages and LED controls. The FreeRTOS scheduler efficiently switches between tasks, observing the green and red LEDs toggling in addition to alternating messages sent via UART every second.
+
 
