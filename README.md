@@ -1,5 +1,5 @@
 # Real Time Operating System ( RTOS ) 
-<<<<<<< HEAD
+
  Third part of Eng Mohamed Tarek Advanced Embedded Course that work with RTOS.
 
 - In this part we will study all the features of the real time operating system include: 
