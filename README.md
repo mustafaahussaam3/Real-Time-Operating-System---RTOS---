@@ -1,13 +1,11 @@
 # Real Time Operating System ( RTOS ) 
-<<<<<<< HEAD
  Third part of Eng Mohamed Tarek Advanced Embedded Course that work with RTOS.
 
-- In this part we will study all the features of the real time operating system include: 
 
 - Unlike background/foreground systems that is less complex, freeRTOS is task based system which controlling complex systems using several task. 
 - Each task think that it own's the processor, but actually they all own the processor but in multitasking procedure buy controlling this through our tick. 
 - Each tick call the schedular and check for the tasks in the ready state, if a task has a higher priority it win the race and enter the run state.
-
+- In this part we will study all the features of the real time operating system include: 
  1. Memory Management.
  2. Task Management. 
  3. Tick and Time Management.
@@ -79,10 +77,101 @@ BaseType_t xTaskCreate(
  UBaseType_t uxPriority,
  TaskHandle_t * const pxCreatedTask )
 ```
-### ![Lab1: Multitasking with FreeRTOS (Serial)](<>)
+### Lab1: Multitasking with FreeRTOS (Serial)
 
 This introductory lab demonstrates the idea of multitasking with FreeRTOS, The setup involves two tasks, vPeriodicTask1 and vPeriodicTask2, both having equal priority. FreeRTOS smoothly switches between these tasks, enabling each to print its message "Task x is running\r\n" through UART in a loop every 1 second.
-=======
- Third part of Eng Mohamed Tarek Advanced Embedded Course that work with RTOS. 
- 
->>>>>>> 13c57075fe51ecf6613ac91ab377b27942c1d6e5
+
+```c 
+xTaskCreate(vPeriodicTask1, "Task 1", 256, NULL, 1,NULL);    
+xTaskCreate(vPeriodicTask2, "Task 2", 256, NULL, 1, NULL);`
+``` 
+- Creating two tasks with the same priority with preemptive schedule, that will check the round robin case, if it true as the default it will gives each task the same time.
+- In this case, the last task created is the first task runs in the schedular.
+```c 
+void vPeriodicTask2(void *pvParameters)
+{
+    for (;;)
+    {
+        Delay_MS(1000);
+        UART0_SendString("Task 2 is running\r\n");
+    }
+}
+```
+
+```c 
+void vPeriodicTask1(void *pvParameters)
+{
+    for (;;)
+    {
+        UART0_SendString("Task 1 is running\r\n");
+        Delay_MS(1000);
+    }
+}
+```
+- In this case, Task2 runs first and it will consume 10ms from it's delay, then the schedular will switch to task 1 that will send " Task 1 is running " (if the 10 ms is suitabke for sending it !) then the processor switch back to task 2 and conume other 10ms, and it will switching forth and back for 2 seconds, after that it will display "Task2 is running" then "Task 1 is running" and repeat itself. 
+
+### Lab2: Introduction to Multitasking with FreeRTOS (LEDs)
+It is required to implement a FreeRTOS app which consists of two tasks, vPeriodicGreenLedTask and vPeriodicRedLedTask, which are implemented with equal priority. The scheduler efficiently alternates between these tasks, resulting in a constant cycle where each task blinks an LED for one second. The vPeriodicGreenLedTask toggles the green LED, while the vPeriodicRedLedTask toggles the red LED.
+
+```c
+void vPeriodicGreenLedTask(void *pvParameters)
+{
+    for (;;)
+    {
+        GPIO_GreenLedToggle();
+        Delay_MS(500);
+    }
+}
+
+void vPeriodicRedLedTask(void *pvParameters)
+{
+    for (;;)
+    {
+        Delay_MS(500);
+        GPIO_RedLedToggle();
+    }
+}
+```
+- Same as the last code but we change function impentation.
+
+### Lab3: Passing parameters to tasks (1st serial example)
+This example serves as an introduction to the concept of passing parameters to tasks using FreeRTOS's xTaskCreate function. The application features a single task, vPeriodicTask, which is responsible for periodically sending a predefined text, "Task 1 is running\r\n," via UART every second. The task creation involves passing the text as a parameter to the task through pvParameters.
+
+```c
+xTaskCreate(  vPeriodicTask, "Task 1", 256, "Task 1 is running\r\n" , 1, NULL);
+
+void vPeriodicTask(void *pvParameters)
+{
+    for (;;)
+    {
+        UART0_SendString((const uint8*)pvParameters);
+        Delay_MS(1000);
+    }
+}
+```
+- We will type cast what we send because the parameter is a generic pointer.
+
+### Lab4: Passing parameters to tasks (2nd serial example)
+In this lab, It’s required to implement 2 tasks ("Task 1" and "Task 2") of the same priority sharing the same task body (function) but for varied behavior, each task shall print its message like "Task 1 is running\r\n" and "Task 2 is running\r\n" sent over UART every second.
+
+```c 
+xTaskCreate( vPeriodicTask, "Task 2", 256, (void* pcTextForTask2, 1, NULL );
+
+xTaskCreate( vPeriodicTask, "Task 1", 256, (void*)pcTextForTask1, 1, NULL );
+
+void vPeriodicTask(void *pvParameters)
+{
+    for (;;)
+    {
+        UART0_SendString(( uint8 * ) pvParameters);
+        Delay_MS(1000);
+    }
+}
+```
+
+- This code will share the same function between the two tasks and also UART, but it differentiate between the two task throught the task parameter. 
+- The output will not be correct, but we will learn how to correct it later on.
+
+### Lab5: Passing multiple parameters to task (LEDs with serial)
+In the lab, it is required to advance the concept of task parameterization by sending multiple task information containing both the string to be printed and the LED to be toggled. Tasks "Task 1" and "Task 2" share the same task body but now receive 2 pieces of data, allowing differentiation in both messages and LED controls. The FreeRTOS scheduler efficiently switches between tasks, observing the green and red LEDs toggling in addition to alternating messages sent via UART every second.
+
