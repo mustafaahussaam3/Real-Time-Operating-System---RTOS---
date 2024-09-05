@@ -175,4 +175,53 @@ void vPeriodicTask(void *pvParameters)
 ### Lab5: Passing multiple parameters to task (LEDs with serial)
 In the lab, it is required to advance the concept of task parameterization by sending multiple task information containing both the string to be printed and the LED to be toggled. Tasks "Task 1" and "Task 2" share the same task body but now receive 2 pieces of data, allowing differentiation in both messages and LED controls. The FreeRTOS scheduler efficiently switches between tasks, observing the green and red LEDs toggling in addition to alternating messages sent via UART every second.
 
+```c
+/* Create a struct which consist of information to the function */
+typedef struct {
+    const uint8 *pcParam;
+    uint8 ledNumber;
+}Configurations_t;
+
+Configurations_t Task1 = { "Task1 is running \r\n" , GREEN};
+Configurations_t Task2 = { "Task2 is running \r\n" , RED}; 
+```
+```c
+/* Create the two functions and pass the address of the structs */
+xTaskCreate( vPeriodicTask, "Task 1", 256, (void*)&Task1, 1, NULL );
+xTaskCreate( vPeriodicTask, "Task 2", 256, (void*)&Task2, 1, NULL );
+```
+```c
+/* typecast the struct and switch between the structs */
+void vPeriodicTask(void *pvParameters)
+{
+  Configurations_t *Task = (Configurations_t*)pvParameters;
+
+    for (;;)
+    {
+        switch (Task->ledNumber)
+        {
+            case GREEN:
+                         Delay_MS(500);
+                         UART0_SendString(Task->pcParam);
+                         GPIO_GreenLedToggle();
+                         break;
+            case   RED:
+                        UART0_SendString(Task->pcParam);
+                        GPIO_RedLedToggle();
+                        Delay_MS(500);
+                        break;
+        }
+
+    }
+}
+```
+## Idle Task 
+- Is a special task that is created by the schedular to be called when there is no other tasks running on the CPU.
+- There must be at least one task running so, the idle task solve this issue.
+- It puts the CPU at low-power mode to conserve energy or executing simple loop that continuously checks for the availability of other tasks.
+- It has the lowest priotity (zero), so we start our tasks priority with 1.
+
+### Lab6: FreeRTOS Delay & Idle Task
+This lab is to explain the concept of using vTaskDelay as an alternative to traditional blocking delays. This example serves as an introduction to the efficient management of task delays within FreeRTOS. Additionally, the lab illustrates the idea of the idle task in the overall system. Tasks, represented by " vPeriodicGreenLedTask" and " vPeriodicRedLedTask," utilize vTaskDelay to achieve dynamic LED toggling between green and red LEDs using non-blocking delays of 1sec.
+
 
