@@ -353,4 +353,4 @@ configSUPPORT_DYNAMIC_ALLOCATION 0
 configSUPPORT_STATIC_ALLOCATION  1
 configSUPPORT_DYNAMIC_ALLOCATION 1
 ```
-- In this manner, you will abke to create your own stack for TCB and Task through puxStackBuffer and pcTaskBuffer.
+- In this manner, you will able to create your own stack for TCB and Task through puxStackBuffer and pcTaskBuffer.
