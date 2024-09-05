@@ -220,8 +220,137 @@ void vPeriodicTask(void *pvParameters)
 - There must be at least one task running so, the idle task solve this issue.
 - It puts the CPU at low-power mode to conserve energy or executing simple loop that continuously checks for the availability of other tasks.
 - It has the lowest priotity (zero), so we start our tasks priority with 1.
+- vTaskDelay enters blocking state until it timeout, allow other tasks to run.
 
 ### Lab6: FreeRTOS Delay & Idle Task
 This lab is to explain the concept of using vTaskDelay as an alternative to traditional blocking delays. This example serves as an introduction to the efficient management of task delays within FreeRTOS. Additionally, the lab illustrates the idea of the idle task in the overall system. Tasks, represented by " vPeriodicGreenLedTask" and " vPeriodicRedLedTask," utilize vTaskDelay to achieve dynamic LED toggling between green and red LEDs using non-blocking delays of 1sec.
 
+- add this to configuration file to use v task delay API 
+```c
+#define INCLUDE_vTaskDelay                      1
+```
 
+## Sheduling Algorithms 
+
+- Free RTOS Provide 3 several algorithms
+
+   1- Preemptive Scheduling with Time Slicing. 
+
+   2- Preemptive Scheduling without Time Slicing.
+
+   3- Cooperative Scheduling.
+
+### Lab7: Fixed Priority Preemptive Scheduling with Time Slicing
+This example demonstrates the first scheduling type offered by FreeRTOS - Fixed Priority Preemptive Scheduling with Time Slicing. The application comprises three tasks, each assigned a specific priority - "Task 1" with a priority of 2, and "Task 2" and "Task 3" with a priority of 1. As "Task 1" starts, it prints its string and then enters a non-blocking delay of 2 seconds using vTaskDelay. This delay allows the two lower-priority tasks to execute in a time-sliced manner, each running for 1 second before returning to "Task 1."
+
+- In this Example Task 1 start first, then it will enters the block state due to vTaskDelay, then the processor will share the processor between task2 and 3 until task 1 finishes. 
+- The last one entered the schedule will be the first to run on the time slice and this is unlike preemptive without time slicing.
+
+```c
+    xTaskCreate( Task1 , "Task 1", 256, NULL, 2, NULL );
+	xTaskCreate( Task2 , "Task 2", 256, NULL, 1, NULL );
+    xTaskCreate( Task3 , "Task 3", 256, NULL, 1, NULL );
+```
+
+### Lab8: Fixed Priority Preemptive Scheduling without Time Slicing
+This example demonstrates the second scheduling type offered by FreeRTOS - Fixed Priority Preemptive Scheduling without Time Slicing. The application is the same as the previous lab which comprises three tasks, each assigned a specific priority - "Task 1" with a priority of 2, and "Task 2" and "Task 3" with a priority of 1. As "Task 1" initiates, it prints its message and introduces a delay of 2 seconds using vTaskDelay. This delay ensures that "Task 2" and "Task 3," both with lower priorities, execute one after the other, rather than in a time-sliced manner.
+
+- You need to add this to configuration file to use without time slice.
+
+```c
+#define configUSE_TIME_SLICING                (0)
+```
+
+- In this example, Task1 run then enter the block state for 2 seconds, in this time task2 ( which is entered the schedular first before task 3 ) will enters the running state, and after task 1 interrupted it and finishes, task3 will run. 
+
+### Lab9: Fixed Priority Cooperative Scheduling
+This example demonstrates the third scheduling type offered by FreeRTOS - Fixed Priority Cooperative Scheduling. The application is the same as the previous lab which comprises three tasks, each assigned a specific priority - "Task 1" with a priority of 2, and "Task 2" and "Task 3" with a priority of 1.
+
+- Change this configurations
+
+```c
+#define configUSE_PREEMPTION                  (0)
+#define configUSE_TIME_SLICING                (1)
+```
+
+- In this Example, Task1 will run as it's the higher priority.
+- then it enters the block state.
+- task2 will enters now and run infinitely because it will not leave the processor.
+
+## Task Yield
+
+- We use Task Yield with Cooperative scheduling to make the task leave the CPU. 
+- When it leaves the schedular checks for a task with higher priority or same priority, if there no higher priority task, it will take the processor another time. 
+- No effect if task yield if the preemption equal one. 
+- Task Yield Simply triggers pendSV for context switch.
+
+## Task Suspend and Resume 
+
+- Task Can suspend itself or any other task during runtime.
+- The Task will be in the suspended state until it explicitly resumed.
+- We can enter Suspende state from any other state.
+- If task want to suspend itself it has to send NULL to the Handle 
+
+To use Task Suspend and Resume we have to add this to the Configurations file
+```c
+#define INCLUDE_vTaskSuspend 1
+```
+
+## Task Priority Set and Get APIs
+
+- This APIs allow you to set and get the task priority dynamically during runtime.
+- The task can query it's task by sending NULL to the Handle
+- This configuration must set to on, to use the APIs 
+```c
+#define INCLUDE_uxTaskPriorityGet  1 
+#define INCLUDE_uxTaskPrioritySet  1 
+```
+- A context switch will occur before the function returns if the priority being set is higher than the currently executing task.
+- Priority must be less than configMax_PRIORITIES-1
+
+## vTaskDelay vs vTaskDelayUntil APIs
+
+- vTaskDelay time is relative to the time it enters the task.
+- But, vTaskDelayUntil is delays the task until a specific absolute time. it allows the tasks to execute periodically throught a fixed time intervels.
+- You must define this in the configurations to be able to use this API.
+```c
+#define INCLUE_vTaskDelayUntil  1
+```
+- Has two parameters:
+
+    1- pxPerviousWakeTime: Hold the time at which task left the blocked state.
+    - Used as reference time to calculate the time at which task should next leave the blocked state.
+
+    2- xTimeIncrement: Specifies the time in Ticks.
+
+    ![image](<Images/vTaskDelayUntil.png>)
+
+## Delete a Task
+- Task can delete itself or any other task throught vTaskDelete() Api
+- To use API you Have to Include this in configurations.
+```c 
+#define INCLUDE_vTaskDelete  1
+```
+- It will removes the task from freeRTOS Kernel Management.
+- NOTE: it must be essential that the idle task is not starved of processing time. This because the Idle task is responsible for cleaning up kernel resources after a task has been deleted.
+
+## Compile Time Configurations
+
+- System can be dynamically configured, statially configured, dynamically and statically.
+
+- Dyanamic System:
+```c
+configSUPPORT_STATIC_ALLOCATION  0 (default)
+configSUPPORT_DYNAMIC_ALLOCATION 1 (default)
+```
+- Static System:
+```c 
+configSUPPORT_STATIC_ALLOCATION  1
+configSUPPORT_DYNAMIC_ALLOCATION 0
+```
+- Mixed System: 
+```c
+configSUPPORT_STATIC_ALLOCATION  1
+configSUPPORT_DYNAMIC_ALLOCATION 1
+```
+- In this manner, you will abke to create your own stack for TCB and Task through puxStackBuffer and pcTaskBuffer.
