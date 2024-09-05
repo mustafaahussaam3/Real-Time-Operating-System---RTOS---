@@ -303,7 +303,7 @@ To use Task Suspend and Resume we have to add this to the Configurations file
 - This configuration must set to on, to use the APIs 
 ```c
 #define INCLUDE_uxTaskPriorityGet  1 
-#define INCLUDE_uxTaskPrioritySet  1 
+#define INCLUDE_vTaskPrioritySet   1 
 ```
 - A context switch will occur before the function returns if the priority being set is higher than the currently executing task.
 - Priority must be less than configMax_PRIORITIES-1
