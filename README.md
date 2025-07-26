@@ -1,6 +1,5 @@
 # Real Time Operating System ( RTOS ) 
 
- Third part of Eng Mohamed Tarek Advanced Embedded Course that work with RTOS.
 
 - Unlike background/foreground systems that is less complex, freeRTOS is task based system which controlling complex systems using several task. 
 - Each task think that it own's the processor, but actually they all own the processor but in multitasking procedure buy controlling this through our tick. 
